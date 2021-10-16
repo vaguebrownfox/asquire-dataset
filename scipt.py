@@ -56,6 +56,8 @@ def unpack_wav(audio, anote, filename): # for each file
     fs, data = wavfile.read(audio)
     channel_1 = data[:, 0]
     
+    
+    
     anote_frame = get_anote_frames(anote)
     types = get_types(anote_frame)
         
@@ -70,8 +72,8 @@ def unpack_wav(audio, anote, filename): # for each file
             ts = sec["start"][:1].to_numpy()[0]
             te = sec["end"][-1:].to_numpy()[0]
             
-            start = int((ts - pad) * fs)
-            end   = int((te + pad) * fs)
+            start = int((ts - pad) * fs) if ts - pad > 0 else 0
+            end   = int((te + pad) * fs) 
             
             fn = f"{filename}_{t}_{si+1}_{len(sec)}"
             f_csv = os.path.join(unpack_folder, f"{fn}.txt")
