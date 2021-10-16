@@ -1,14 +1,22 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Sep 19 03:00:46 2021
+
+@author: darwin | vaguebrownfox
+"""
+
 from scipy.io import wavfile
 import numpy as np
 import pandas as pd
 import os
 
-audio_folder = "data/audio"
-anote_folder = "data/anote"
-unpack_folder = "data/unpackd_audio2"
+audio_folder = "data/audio" # source folder with all anotation files
+anote_folder = "data/anote" # source folder with all audio files
+unpack_folder = "data/unpackd_audio" # destination folder
 
-audio_files = os.listdir(audio_folder)
-pad = 0.7;
+audio_files = os.listdir(audio_folder) # get all files
+pad = 0.7; # zero padding duration (s)
 
 def rm_nums(t) :
     return ''.join([c for c in t if not c.isdigit()]).strip()
@@ -33,7 +41,6 @@ def get_types(anote_frame) :
         if m in types:
             types.remove(m)
     types.append("|".join(m_types))
-    
     return types
 
 def get_type_sections(type_frame) :
@@ -45,18 +52,13 @@ def get_type_sections(type_frame) :
             sec = type_frame.iloc[sp:i + 1, :]
             tfs.append(sec)
             sp = i + 1
-    sec = type_frame.iloc[sp:, :]
-    tfs.append(sec)
+    tfs.append(type_frame.iloc[sp:, :])
     return tfs
     
-    
 def unpack_wav(audio, anote, filename): # for each file
-    if not os.path.exists(unpack_folder):
-        os.mkdir(unpack_folder)
+    if not os.path.exists(unpack_folder): os.mkdir(unpack_folder)
     fs, data = wavfile.read(audio)
     channel_1 = data[:, 0]
-    
-    
     
     anote_frame = get_anote_frames(anote)
     types = get_types(anote_frame)
@@ -64,7 +66,6 @@ def unpack_wav(audio, anote, filename): # for each file
     for t in types :
         type_frame = anote_frame[anote_frame['type']
                                  .str.contains(t, na=False)]
-    
         tf_sections = get_type_sections(type_frame)
         
         for si, sec in enumerate(tf_sections):
@@ -84,7 +85,6 @@ def unpack_wav(audio, anote, filename): # for each file
             aud_chunk = channel_1[start : end]
             f_wav = os.path.join(unpack_folder, f"{fn}.wav")
             wavfile.write(f_wav, fs, aud_chunk)
-
 
 for file in audio_files:
     audiopath = os.path.join(audio_folder, file)
